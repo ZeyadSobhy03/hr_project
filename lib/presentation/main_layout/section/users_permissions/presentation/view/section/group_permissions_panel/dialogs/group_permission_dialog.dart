@@ -85,44 +85,46 @@ Future<void> showGroupPermissionDialog({
                 width: 760,
                 child: Form(
                   key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextFormField(
-                        controller: nameCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'اسم المجموعة',
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextFormField(
+                          controller: nameCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'اسم المجموعة',
+                          ),
+                          validator: (value) {
+                            if (value == null ||
+                                value.trim().isEmpty) {
+                              return 'اكتب اسم المجموعة';
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if (value == null ||
-                              value.trim().isEmpty) {
-                            return 'اكتب اسم المجموعة';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      const Text(
-                        'حدد الشاشات والعمليات المتاحة لأعضاء المجموعة',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
+                    
+                        const SizedBox(height: 16),
+                    
+                        const Text(
+                          'حدد الشاشات والعمليات المتاحة لأعضاء المجموعة',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      PermissionsMatrix(
-                        values: values,
-                        onChanged: (newValues) {
-                          setDialogState(() {
-                            values = newValues;
-                          });
-                        },
-                      ),
-                    ],
+                    
+                        const SizedBox(height: 8),
+                    
+                        PermissionsMatrix(
+                          values: values,
+                          onChanged: (newValues) {
+                            setDialogState(() {
+                              values = newValues;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

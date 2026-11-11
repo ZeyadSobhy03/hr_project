@@ -49,7 +49,6 @@ class _GroupPermissionsPanelState
     );
   }
 
-  // Confirm group deletion
   Future<void> _confirmDelete(
       Map<String, dynamic> group,
       ) async {

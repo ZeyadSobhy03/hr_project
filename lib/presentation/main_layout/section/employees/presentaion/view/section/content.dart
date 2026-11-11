@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hr_project/presentation/main_layout/section/employees/presentaion/view/widgets/employees_card_list.dart';
 
 import '../../../../../../../core/resources/widgets/custom_button.dart';
 import '../../../data/model/employee.dart';
@@ -71,95 +72,128 @@ class EmployeesContent extends StatelessWidget {
   final ValueChanged<Employee> onEdit;
   final ValueChanged<Employee> onDelete;
 
+  static const double _mobileBreakpoint = 700;
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: BasicInfoCard(
-                      nameCtrl: nameCtrl,
-                      addressCtrl: addressCtrl,
-                      phoneCtrl: phoneCtrl,
-                      nationalityCtrl: nationalityCtrl,
-                      nationalIdCtrl: nationalIdCtrl,
-                      birthDateCtrl: birthDateCtrl,
-                      gender: gender,
-                      genders: genders,
-                      onGenderChanged: onGenderChanged,
-                    ),
-                  ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < _mobileBreakpoint;
+        final gap = isMobile ? 12.0 : 20.0;
 
-                  const SizedBox(width: 20),
+        final basicCard = BasicInfoCard(
+          nameCtrl: nameCtrl,
+          addressCtrl: addressCtrl,
+          phoneCtrl: phoneCtrl,
+          nationalityCtrl: nationalityCtrl,
+          nationalIdCtrl: nationalIdCtrl,
+          birthDateCtrl: birthDateCtrl,
+          gender: gender,
+          genders: genders,
+          onGenderChanged: onGenderChanged,
+        );
 
-                  Expanded(
-                    child: WorkInfoCard(
-                      department: department,
-                      departments: departmentNames,
-                      onDepartmentChanged: onDepartmentChanged,
-                      hireDateCtrl: hireDateCtrl,
-                      salaryCtrl: salaryCtrl,
-                      checkInCtrl: checkInCtrl,
-                      checkOutCtrl: checkOutCtrl,
-                      showSalary: canSalary,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              Row(
-                children: [
-                  CustomButton(
-                    text: 'حفظ',
-                    isLoading: saving && !isEditing,
-                    onPressed: (saving || isEditing) ? null : onSave,
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  CustomButton(
-                    text: 'تعديل',
-                    type: ButtonType.secondary,
-                    isLoading: saving && isEditing,
-                    onPressed: (saving || !isEditing) ? null : onUpdate,
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  CustomButton(
-                    text: 'حذف',
-                    type: ButtonType.danger,
-                    onPressed: (saving || !isEditing)
-                        ? null
-                        : onDeleteSelected,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 24),
-
-        EmployeesTable(
-          employees: employees,
-          onEdit: onEdit,
-          onDelete: onDelete,
+        final workCard = WorkInfoCard(
+          department: department,
+          departments: departmentNames,
+          onDepartmentChanged: onDepartmentChanged,
+          hireDateCtrl: hireDateCtrl,
+          salaryCtrl: salaryCtrl,
+          checkInCtrl: checkInCtrl,
+          checkOutCtrl: checkOutCtrl,
           showSalary: canSalary,
-        ),
-      ],
+        );
+
+        final saveBtn = CustomButton(
+          text: 'حفظ',
+          isLoading: saving && !isEditing,
+          onPressed: (saving || isEditing) ? null : onSave,
+        );
+
+        final updateBtn = CustomButton(
+          text: 'تعديل',
+          type: ButtonType.secondary,
+          isLoading: saving && isEditing,
+          onPressed: (saving || !isEditing) ? null : onUpdate,
+        );
+
+        final deleteBtn = CustomButton(
+          text: 'حذف',
+          type: ButtonType.danger,
+          onPressed: (saving || !isEditing) ? null : onDeleteSelected,
+        );
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (isMobile) ...[
+                    basicCard,
+                    SizedBox(height: gap),
+                    workCard,
+                  ] else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: basicCard),
+                        SizedBox(width: gap),
+                        Expanded(child: workCard),
+                      ],
+                    ),
+                  SizedBox(height: gap),
+                  if (isMobile)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(width: double.infinity, child: saveBtn),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(child: updateBtn),
+                            const SizedBox(width: 10),
+                            Expanded(child: deleteBtn),
+                          ],
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        saveBtn,
+                        const SizedBox(width: 12),
+                        updateBtn,
+                        const SizedBox(width: 12),
+                        deleteBtn,
+                      ],
+                    ),
+                ],
+              ),
+            ),
+            SizedBox(height: isMobile ? 16 : 24),
+            if (isMobile)
+              EmployeesCardList(
+                employees: employees,
+                onEdit: onEdit,
+                onDelete: onDelete,
+                showSalary: canSalary,
+              )
+            else
+              EmployeesTable(
+                employees: employees,
+                onEdit: onEdit,
+                onDelete: onDelete,
+                showSalary: canSalary,
+              ),
+          ],
+        );
+      },
     );
   }
 }
+

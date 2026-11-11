@@ -29,20 +29,22 @@ class DailyAttendanceFilters extends StatelessWidget {
   final VoidCallback onSearch;
   final VoidCallback onMarkAll;
 
+  static const double _mobileBreakpoint = 700;
+
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        CustomButton(
+    return LayoutBuilder(
+      builder: (context, c) {
+        final isMobile = c.maxWidth < _mobileBreakpoint;
+
+        final dateBtn = CustomButton(
           text: AppFormat.dateToDb(date),
           type: ButtonType.secondary,
           icon: Icons.calendar_today,
           onPressed: onPickDate,
-        ),
-        SegmentedButton<DayFilter>(
+        );
+
+        final segmented = SegmentedButton<DayFilter>(
           style: SegmentedButton.styleFrom(
             backgroundColor: Colors.grey.shade200,
             selectedBackgroundColor: Colors.blue.shade100,
@@ -56,24 +58,59 @@ class DailyAttendanceFilters extends StatelessWidget {
           ],
           selected: {filter},
           onSelectionChanged: (s) => onFilterChanged(s.first),
-        ),
-        SizedBox(
-          width: 240,
-          child: TextField(
-            controller: searchCtrl,
-            decoration: AppStyles.input(hint: 'بحث باسم الموظف أو القسم'),
-            onSubmitted: (_) => onSearch(),
-          ),
-        ),
-        CustomButton(text: 'بحث', onPressed: onSearch),
-        CustomButton(
+        );
+
+        final searchField = TextField(
+          controller: searchCtrl,
+          decoration: AppStyles.input(hint: 'بحث باسم الموظف أو القسم'),
+          onSubmitted: (_) => onSearch(),
+        );
+
+        final searchBtn = CustomButton(text: 'بحث', onPressed: onSearch);
+
+        final markAllBtn = CustomButton(
           text: 'تسجيل الكل حاضر',
           type: ButtonType.secondary,
           icon: Icons.done_all,
           isLoading: isSaving,
           onPressed: canMarkAll ? onMarkAll : null,
-        ),
-      ],
+        );
+
+        if (isMobile) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: searchField),
+                  const SizedBox(width: 8),
+                  searchBtn,
+                ],
+              ),
+              const SizedBox(height: 10),
+              SizedBox(width: double.infinity, child: segmented),
+              const SizedBox(height: 10),
+              dateBtn,
+              const SizedBox(height: 10),
+              markAllBtn,
+            ],
+          );
+        }
+
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            dateBtn,
+            segmented,
+            SizedBox(width: 240, child: searchField),
+            searchBtn,
+            markAllBtn,
+          ],
+        );
+      },
     );
   }
 }

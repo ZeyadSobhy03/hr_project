@@ -181,17 +181,19 @@ class _SalaryReportsState extends State<SalaryReports> {
     ),
   );
 
-  Widget _exportBar(SalaryReportsState state) => Row(
-    children: [
-      Text(
-        'العدد: ${state.total}',
-        style: const TextStyle(fontSize: 13, color: ColorManger.textPrimary),
-      ),
-      const Spacer(),
-      if (_exporting)
-        const Padding(
-          padding: EdgeInsetsDirectional.only(end: 12),
-          child: SizedBox(
+  Widget _exportBar(SalaryReportsState state) {
+    final count = Text(
+      'العدد: ${state.total}',
+      style: const TextStyle(fontSize: 13, color: ColorManger.textPrimary),
+    );
+
+    final buttons = Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        if (_exporting)
+          const SizedBox(
             width: 18,
             height: 18,
             child: CircularProgressIndicator(
@@ -199,21 +201,43 @@ class _SalaryReportsState extends State<SalaryReports> {
               color: ColorManger.primary,
             ),
           ),
+        _exportButton(
+          label: 'Excel',
+          icon: Icons.table_chart_outlined,
+          onPressed: _exporting ? null : () => _export(state, pdf: false),
         ),
-      _exportButton(
-        label: 'Excel',
-        icon: Icons.table_chart_outlined,
-        onPressed: _exporting ? null : () => _export(state, pdf: false),
-      ),
-      const SizedBox(width: 8),
-      _exportButton(
-        label: 'PDF',
-        icon: Icons.picture_as_pdf_outlined,
-        onPressed: _exporting ? null : () => _export(state, pdf: true),
-      ),
-    ],
-  );
+        _exportButton(
+          label: 'PDF',
+          icon: Icons.picture_as_pdf_outlined,
+          onPressed: _exporting ? null : () => _export(state, pdf: true),
+        ),
+      ],
+    );
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // موبايل: العدد فوق والأزرار تحته
+        if (constraints.maxWidth < _mobileBreakpoint) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              count,
+              const SizedBox(height: 8),
+              buttons,
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            count,
+            const Spacer(),
+            buttons,
+          ],
+        );
+      },
+    );
+  }
   Widget _forbidden() => const Center(
     child: Padding(
       padding: EdgeInsets.all(40),
@@ -227,7 +251,7 @@ class _SalaryReportsState extends State<SalaryReports> {
       ),
     ),
   );
-
+  static const double _mobileBreakpoint = 700;
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SalaryReportsCubit, SalaryReportsState>(

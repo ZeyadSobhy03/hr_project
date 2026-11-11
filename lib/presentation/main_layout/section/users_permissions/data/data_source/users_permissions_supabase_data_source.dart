@@ -38,7 +38,7 @@ class UsersPermissionsSupabaseDataSource
   @override
   Future<List<Map<String, dynamic>>> getGroupPermissions(String groupId) async {
     final rows = await _client
-        .from('group_permissions_panel')
+        .from('group_permissions')
         .select('screen,can_view,can_add,can_edit,can_delete')
         .eq('group_id', groupId);
     return rows.map((row) => Map<String, dynamic>.from(row)).toList();

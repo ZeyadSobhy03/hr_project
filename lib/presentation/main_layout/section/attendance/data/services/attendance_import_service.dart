@@ -47,20 +47,31 @@ class AttendanceImportService {
       if ([nameV, dateV, statusV, inV, outV].every(_isBlank)) continue;
 
       final name = _text(nameV);
+      final date = _date(dateV);
+
+      ImportError fail(String message) => ImportError(
+        n,
+        message,
+        employeeName: name,
+        date: date != null ? _ymd(date) : _text(dateV),
+        status: _text(statusV),
+        checkIn: _time(inV) ?? _text(inV),
+        checkOut: _time(outV) ?? _text(outV),
+      );
+
       if (name.isEmpty) {
-        errors.add(ImportError(n, 'اسم الموظف مطلوب'));
+        errors.add(fail('اسم الموظف مطلوب'));
         continue;
       }
 
-      final date = _date(dateV);
       if (date == null) {
-        errors.add(ImportError(n, 'التاريخ غير صحيح: $name'));
+        errors.add(fail('التاريخ غير صحيح'));
         continue;
       }
 
       final status = _status(statusV);
       if (status == null) {
-        errors.add(ImportError(n, 'الحالة يجب أن تكون حاضر أو غائب: $name'));
+        errors.add(fail('الحالة يجب أن تكون حاضر أو غائب'));
         continue;
       }
 
@@ -75,24 +86,23 @@ class AttendanceImportService {
       }
 
       if (_isBlank(inV)) {
-        errors.add(ImportError(n, 'وقت الحضور مطلوب للموظف الحاضر: $name'));
+        errors.add(fail('وقت الحضور مطلوب للموظف الحاضر'));
         continue;
       }
       final checkIn = _time(inV);
       if (checkIn == null) {
-        errors.add(ImportError(n, 'وقت الحضور غير صحيح: $name'));
+        errors.add(fail('وقت الحضور غير صحيح'));
         continue;
       }
       String? checkOut;
       if (!_isBlank(outV)) {
         checkOut = _time(outV);
         if (checkOut == null) {
-          errors.add(ImportError(n, 'وقت الانصراف غير صحيح: $name'));
+          errors.add(fail('وقت الانصراف غير صحيح'));
           continue;
         }
         if (checkOut.compareTo(checkIn) <= 0) {
-          errors.add(
-              ImportError(n, 'وقت الانصراف يجب أن يكون بعد وقت الحضور: $name'));
+          errors.add(fail('وقت الانصراف يجب أن يكون بعد وقت الحضور'));
           continue;
         }
       }
@@ -166,6 +176,11 @@ class AttendanceImportService {
     final dt = DateTime(y, m, d);
     return dt.year == y && dt.month == m && dt.day == d ? dt : null;
   }
+
+  static String _ymd(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-'
+          '${d.month.toString().padLeft(2, '0')}-'
+          '${d.day.toString().padLeft(2, '0')}';
 
   static String? _time(CellValue? v) {
     if (v == null) return null;

@@ -54,86 +54,138 @@ class AddUserCard extends StatelessWidget {
     return null;
   }
 
+  static const double _mobileBreakpoint = 700;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: ColorManger.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColorManger.cardBorder),
-      ),
-      child: Form(
-        key: formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'إضافة مستخدم جديد',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: ColorManger.textPrimary,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < _mobileBreakpoint) {
+          final fullNameField = CustomTextFormedField(
+            controller: fullNameCtrl,
+            label: 'الاسم الكامل',
+            validator: _required,
+          );
+          final usernameField = CustomTextFormedField(
+            controller: usernameCtrl,
+            label: 'اسم المستخدم',
+            validator: _username,
+          );
+          final emailField = CustomTextFormedField(
+            controller: emailCtrl,
+            label: 'البريد الإلكتروني',
+            validator: _email,
+          );
+          final passwordField = CustomTextFormedField(
+            controller: passwordCtrl,
+            label: 'كلمة المرور',
+            validator: _password,
+          );
+          final groupField = DropDownField(
+            value: group,
+            items: groups,
+            label: 'المجموعة',
+            onChanged: onGroupChanged,
+          );
+          final saveButton = CustomButton(onPressed: onSave, text: 'حفظ');
+          return SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  fullNameField,
+                  usernameField,
+                  emailField,
+                  passwordField,
+                  groupField,
+                   SizedBox(height: 20),
+                  saveButton,
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            Row(
+          );
+        }
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: ColorManger.card,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: ColorManger.cardBorder),
+          ),
+          child: Form(
+            key: formKey,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: CustomTextFormedField(
-                    label: 'الاسم بالكامل',
-                    controller: fullNameCtrl,
-                    validator: _required,
+                const Text(
+                  'إضافة مستخدم جديد',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: ColorManger.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: CustomTextFormedField(
-                    label: 'اسم المستخدم',
-                    controller: usernameCtrl,
-                    validator: _username,
+                const SizedBox(height: 20),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: CustomTextFormedField(
+                        controller: fullNameCtrl,
+                        label: 'الاسم الكامل',
+                        validator: _required,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: CustomTextFormedField(
+                        label: 'اسم المستخدم',
+                        controller: usernameCtrl,
+                        validator: _username,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: CustomTextFormedField(
+                        label: 'البريد الإلكتروني',
+                        controller: emailCtrl,
+                        hint: 'Example@gmail.com',
+                        keyboardType: TextInputType.emailAddress,
+                        validator: _email,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: CustomTextFormedField(
+                        label: 'كلمة المرور',
+                        controller: passwordCtrl,
+                        isPassword: true,
+                        validator: _password,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: 222,
+                  child: DropDownField(
+                    label: 'الصلاحيات (المجموعة)',
+                    hint: 'اختر مجموعة',
+                    value: group,
+                    items: groups,
+                    onChanged: onGroupChanged,
+                    validator: (v) => v == null ? 'مطلوب' : null,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: CustomTextFormedField(
-                    label: 'البريد الإلكتروني',
-                    controller: emailCtrl,
-                    hint: 'Example@gmail.com',
-                    keyboardType: TextInputType.emailAddress,
-                    validator: _email,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: CustomTextFormedField(
-                    label: 'كلمة المرور',
-                    controller: passwordCtrl,
-                    isPassword: true,
-                    validator: _password,
-                  ),
-                ),
+                const SizedBox(height: 16),
+                CustomButton(text: 'حفظ', onPressed: onSave),
               ],
             ),
-            const SizedBox(height: 18),
-            SizedBox(
-              width: 222,
-              child: DropDownField(
-                label: 'الصلاحيات (المجموعة)',
-                hint: 'اختر مجموعة',
-                value: group,
-                items: groups,
-                onChanged: onGroupChanged,
-                validator: (v) => v == null ? 'مطلوب' : null,
-              ),
-            ),
-            const SizedBox(height: 16),
-            CustomButton(text: 'حفظ', onPressed: onSave),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

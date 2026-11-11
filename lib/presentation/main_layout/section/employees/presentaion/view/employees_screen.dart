@@ -1,7 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hr_project/core/resources/colors/color_manger.dart';
+import 'package:hr_project/core/resources/widgets/toast.dart';
 import 'package:hr_project/presentation/main_layout/section/employees/data/model/employee.dart';
 import 'package:hr_project/presentation/main_layout/section/employees/presentaion/view/section/content.dart';
 import 'package:hr_project/presentation/main_layout/section/employees/presentaion/view/section/retry.dart';
@@ -247,17 +248,6 @@ class _EmployeesViewState extends State<_EmployeesView> {
   }
 
 
-  void _toast(String message, {bool isError = false}) {
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: isError ? ColorManger.error : ColorManger.primary,
-      textColor: ColorManger.white,
-      fontSize: 14,
-    );
-  }
-
 
   bool _formIsValid() {
     if (!_formKey.currentState!.validate()) return false;
@@ -272,7 +262,7 @@ class _EmployeesViewState extends State<_EmployeesView> {
     );
 
     if (error != null) {
-      _toast(error, isError: true);
+      toast(error, isError: true, context: context);
       return false;
     }
 
@@ -362,7 +352,7 @@ class _EmployeesViewState extends State<_EmployeesView> {
 
       listener: (context, state) {
         if (state is EmployeesActionSuccess) {
-          _toast(state.message);
+          toast(state.message, context: context);
 
           if (_clearOnSuccess) {
             setState(_clearForm);
@@ -370,7 +360,7 @@ class _EmployeesViewState extends State<_EmployeesView> {
 
           _clearOnSuccess = false;
         } else if (state is EmployeesFailure) {
-          _toast(state.message, isError: true);
+          toast(state.message, isError: true, context: context);
 
           _clearOnSuccess = false;
         }

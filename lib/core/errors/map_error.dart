@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app_exception.dart';
@@ -10,11 +10,10 @@ AppException map(Object e) {
 
   if (e is PostgrestException) {
     final msg = '${e.message} ${e.details ?? ''}';
+    debugPrint('PostgrestException: $msg');
 
     switch (e.code) {
-
       case '23505':
-
         if (msg.contains('national_id')) {
           return const AppException('الرقم القومي مسجل لموظف آخر');
         }
@@ -22,6 +21,9 @@ AppException map(Object e) {
           return const AppException('اسم الموظف مسجل من قبل');
         }
         return const AppException('هذه البيانات مسجلة من قبل');
+
+      case '22003':
+        return const AppException('قيمة الراتب كبيرة جدًا');
 
       case '23514':
         if (msg.contains('emp_phone_11_digits')) {
@@ -34,28 +36,39 @@ AppException map(Object e) {
             msg.contains('emp_hire_after_birth')) {
           return const AppException('من فضلك ادخل تاريخ تعاقد صحيح');
         }
-        if (msg.contains('emp_salary_positive')) {
+        if (msg.contains('emp_min_age_at_hire') ||
+            msg.contains('عمر الموظف')) {
+          return const AppException(
+              'يجب ألا يقل عمر الموظف عن 20 سنة وقت التعاقد');
+        }
+        if (msg.contains('emp_salary_positive') ||
+            msg.contains('emp_salary_max')) {
           return const AppException('من فضلك ادخل راتب صحيح');
         }
         if (msg.contains('emp_times_valid')) {
-          return const AppException('موعد الانصراف يجب أن يكون بعد موعد الحضور');
+          return const AppException(
+              'موعد الانصراف يجب أن يكون بعد موعد الحضور');
         }
-        return AppException(e.message);
+        return const AppException('إحدى القيم المدخلة غير مسموحة');
 
       case '23502':
         return const AppException('هذا الحقل مطلوب');
+
       case '23503':
         return const AppException('القسم المختار غير موجود');
+
       case '22007':
       case '22008':
       case '22P02':
         return const AppException('من فضلك تأكد من صحة التواريخ والأرقام');
+
       case '42501': // RLS أو guard_salary
         return AppException(
           e.message.contains('الراتب')
               ? e.message
               : 'ليس لديك صلاحية لتنفيذ هذه العملية',
         );
+
       case 'PGRST116': // 0 rows
         return const AppException('السجل غير موجود أو ليس لديك صلاحية تعديله');
     }

@@ -47,6 +47,12 @@ class WorkInfoCard extends StatelessWidget {
       ),
       if (showSalary)
         CustomTextFormedField(
+          validator: (v) {
+            final value = double.tryParse((v ?? '').trim());
+            if (value == null) return 'أدخل راتب صحيح';
+
+            return null;
+          },
           label: 'الراتب',
           controller: salaryCtrl,
           keyboardType: TextInputType.number,

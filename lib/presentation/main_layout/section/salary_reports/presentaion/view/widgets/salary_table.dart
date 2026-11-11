@@ -3,6 +3,7 @@ import 'package:hr_project/core/resources/colors/color_manger.dart';
 import 'package:hr_project/core/resources/widgets/custom_button.dart';
 
 import '../../../data/models/salary_record.dart';
+import 'mobile_card.dart';
 
 class SalaryTable extends StatelessWidget {
   const SalaryTable({
@@ -15,6 +16,7 @@ class SalaryTable extends StatelessWidget {
   final ValueChanged<SalaryRecord> onDetails;
 
   static const double _minWidth = 980;
+  static const double _mobileBreakpoint = 700;
 
   static const _columns = <(String, int)>[
     ('اسم الموظف', 3),
@@ -37,6 +39,10 @@ class SalaryTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        if (constraints.maxWidth < _mobileBreakpoint) {
+          return _mobileList();
+        }
+
         final width = constraints.maxWidth < _minWidth
             ? _minWidth
             : constraints.maxWidth;
@@ -48,17 +54,33 @@ class SalaryTable extends StatelessWidget {
             child: Column(
               children: [
                 _headerRow(),
-                if (records.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Text('لا توجد بيانات رواتب للفترة المحددة'),
-                  ),
+                if (records.isEmpty) _emptyState(),
                 for (final r in records) _dataRow(r),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _emptyState() => const Padding(
+    padding: EdgeInsets.all(24),
+    child: Center(child: Text('لا توجد بيانات رواتب للفترة المحددة')),
+  );
+
+  Widget _mobileList() {
+    if (records.isEmpty) return _emptyState();
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: records.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 14),
+      itemBuilder: (_, i) => SalaryMobileCard(
+        record: records[i],
+        onDetails: () => onDetails(records[i]),
+      ),
     );
   }
 

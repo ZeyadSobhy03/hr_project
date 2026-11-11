@@ -61,6 +61,7 @@ class EmployeeOption {
     required this.name,
     required this.department,
   });
+
   final String id;
   final String name;
   final String department;
@@ -74,6 +75,7 @@ class EmployeeOption {
 
 class PagedAttendance {
   const PagedAttendance({required this.items, required this.total});
+
   final List<AttendanceRecord> items;
   final int total;
 }
@@ -89,6 +91,7 @@ class ImportRow {
     this.checkIn,
     this.checkOut,
   });
+
   final int rowNumber;
   final String employeeName;
   final DateTime date;
@@ -103,13 +106,44 @@ class ImportResult {
     this.deleted = 0,
     required this.errors,
   });
+
   final int inserted;
   final int deleted;
   final List<ImportError> errors;
 }
+
 class ImportError {
-  const ImportError(this.rowNumber, this.message);
+  const ImportError(
+    this.rowNumber,
+    this.message, {
+    this.employeeName,
+    this.date,
+    this.status,
+    this.checkIn,
+    this.checkOut,
+  });
+
   final int rowNumber;
   final String message;
+  final String? employeeName;
+  final String? date;
+  final String? status;
+  final String? checkIn;
+  final String? checkOut;
+
+  /// Fills any missing row data from a parsed [ImportRow].
+  ImportError withRow(ImportRow r) => ImportError(
+    rowNumber,
+    message,
+    employeeName: employeeName ?? r.employeeName,
+    date: date ?? _ymd(r.date),
+    status: status ?? (r.status == ImportStatus.present ? 'حاضر' : 'غائب'),
+    checkIn: checkIn ?? r.checkIn,
+    checkOut: checkOut ?? r.checkOut,
+  );
 }
 
+String _ymd(DateTime d) =>
+    '${d.year.toString().padLeft(4, '0')}-'
+    '${d.month.toString().padLeft(2, '0')}-'
+    '${d.day.toString().padLeft(2, '0')}';

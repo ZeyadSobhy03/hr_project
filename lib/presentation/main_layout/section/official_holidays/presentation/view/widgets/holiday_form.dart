@@ -42,42 +42,83 @@ class HolidayForm extends StatelessWidget {
     return null;
   }
 
+  static const double _mobileBreakpoint = 700;
+
   @override
   Widget build(BuildContext context) {
     return Form(
       key: formKey,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: CustomTextFormedField(
-              label: 'الاسم',
-              controller: nameCtrl,
-              validator: _required,
-            ),
-          ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 150,
-            child: CustomTextFormedField(
-              label: 'التاريخ',
-              controller: dateCtrl,
-              readOnly: true,
-              validator: _date,
-              onTap: () => pickDate(context, dateCtrl),
-              suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Padding(
-            padding: const EdgeInsets.only(top: 19),
-            child: CustomButton(
-              text: 'إضافة',
-              onPressed: () => onAdd(),
-              isLoading: isSaving,
-            ),
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isMobile = constraints.maxWidth < _mobileBreakpoint;
+          final nameField = CustomTextFormedField(
+            label: 'اسم الإجازة',
+            controller: nameCtrl,
+            validator: _required,
+          );
+          final dateField = CustomTextFormedField(
+            label: 'تاريخ الإجازة',
+            controller: dateCtrl,
+            readOnly: true,
+            onTap: () => pickDate(context, dateCtrl),
+            validator: _date,
+            suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+          );
+          final addButton = CustomButton(
+            text: 'إضافة',
+            type: ButtonType.primary,
+            isLoading: isSaving,
+            onPressed: onAdd,
+          );
+          if (isMobile) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                nameField,
+                const SizedBox(height: 12),
+                dateField,
+                const SizedBox(height: 16),
+                addButton,
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: CustomTextFormedField(
+                  label: 'الاسم',
+                  controller: nameCtrl,
+                  validator: _required,
+                ),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 150,
+                child: CustomTextFormedField(
+                  label: 'التاريخ',
+                  controller: dateCtrl,
+                  readOnly: true,
+                  validator: _date,
+                  onTap: () => pickDate(context, dateCtrl),
+                  suffixIcon: const Icon(
+                    Icons.calendar_today_outlined,
+                    size: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Padding(
+                padding: const EdgeInsets.only(top: 19),
+                child: CustomButton(
+                  text: 'إضافة',
+                  onPressed: () => onAdd(),
+                  isLoading: isSaving,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

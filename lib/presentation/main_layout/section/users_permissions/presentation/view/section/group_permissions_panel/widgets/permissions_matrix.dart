@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hr_project/core/resources/colors/color_manger.dart';
+import 'package:hr_project/presentation/main_layout/section/users_permissions/presentation/view/section/group_permissions_panel/widgets/permissions_mobile_view.dart';
 
 import '../models/screen_permission.dart';
 import '../helpers/permission_helper.dart';
@@ -15,7 +16,8 @@ class PermissionsMatrix extends StatelessWidget {
   final List<ScreenPermission> values;
   final ValueChanged<List<ScreenPermission>> onChanged;
 
-  // تحديد عمود بالكامل
+  static const double _mobileBreakpoint = 600;
+
   void _toggleColumn(String action) {
     final currentState = PermissionHelper.columnState(values, action);
 
@@ -28,7 +30,6 @@ class PermissionsMatrix extends StatelessWidget {
     );
   }
 
-  // تحديد صف واحد فقط
   void _toggleRow(int index) {
     final currentState = PermissionHelper.rowState(values[index]);
 
@@ -41,7 +42,6 @@ class PermissionsMatrix extends StatelessWidget {
     );
   }
 
-  // تحديد صلاحية واحدة
   void _toggleCell(int index, String action, bool enabled) {
     onChanged(
       PermissionHelper.setCell(
@@ -52,6 +52,34 @@ class PermissionsMatrix extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < _mobileBreakpoint) {
+          return ListView.separated(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: values.length,
+            itemBuilder: (context, index) {
+              final item = values[index];
+              return PermissionsMobileView(
+                item: item,
+                toggleRow: (index) => _toggleRow(index),
+                toggleCell: (index, action, enabled) =>
+                    _toggleCell(index, action, enabled),
+              );
+            },
+            separatorBuilder: (context, index) => const SizedBox(height: 16),
+          );
+        }
+        return _tableView();
+      },
+    );
+  }
+
+
 
   Widget _headerCell(String label) {
     return Padding(
@@ -64,7 +92,6 @@ class PermissionsMatrix extends StatelessWidget {
     );
   }
 
-  // Checkbox أعلى العمود
   Widget _columnHeader(String action, String label) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -79,8 +106,7 @@ class PermissionsMatrix extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _tableView() {
     return SizedBox(
       height: 360,
       child: SingleChildScrollView(
@@ -95,26 +121,19 @@ class PermissionsMatrix extends StatelessWidget {
             5: FlexColumnWidth(1),
           },
           children: [
-            // Header
             TableRow(
               decoration: const BoxDecoration(color: ColorManger.tableHeader),
               children: [
                 _headerCell('الشاشة'),
-
-                // Checkbox أعلى كل عمود
                 for (final (action, label) in permissionActions)
                   _columnHeader(action, label),
-
-                // عنوان فقط، بدون Checkbox عام
                 _headerCell('الكل'),
               ],
             ),
 
-            // Rows
             for (int index = 0; index < values.length; index++)
               TableRow(
                 children: [
-                  // اسم الشاشة
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -125,8 +144,6 @@ class PermissionsMatrix extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                   ),
-
-                  // صلاحيات الشاشة
                   for (final (action, _) in permissionActions)
                     Center(
                       child: PermissionCheckbox(
@@ -135,8 +152,6 @@ class PermissionsMatrix extends StatelessWidget {
                             _toggleCell(index, action, checked ?? false),
                       ),
                     ),
-
-                  // Checkbox الكل للصف الحالي فقط
                   Center(
                     child: PermissionCheckbox(
                       value: PermissionHelper.rowState(values[index]) == true,
